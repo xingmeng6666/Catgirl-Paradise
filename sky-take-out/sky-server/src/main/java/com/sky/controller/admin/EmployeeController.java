@@ -13,7 +13,7 @@ import com.sky.service.EmployeeService;
 import com.sky.utils.JwtUtil;
 import com.sky.vo.EmployeeLoginVO;
 import io.swagger.v3.oas.annotations.Operation;
-import org.springdoc.core.annotations.ParameterObject;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,9 +88,39 @@ public class EmployeeController {
 
     @GetMapping("/page")
     @Operation(summary = "员工分页查询")
-    public Result<PageResult> page(@ParameterObject @ModelAttribute EmployeePageQueryDTO employeePageQueryDTO) {
+    public Result<PageResult> page(
+            @Parameter(description = "员工姓名") String name,
+            @Parameter(description = "页码") Integer page,
+            @Parameter(description = "每页显示记录数") Integer pageSize) {
+        EmployeePageQueryDTO employeePageQueryDTO = new EmployeePageQueryDTO();
+        employeePageQueryDTO.setName(name);
+        employeePageQueryDTO.setPage(page);
+        employeePageQueryDTO.setPageSize(pageSize);
         log.info("员工分页查询，参数为：{}", employeePageQueryDTO);
         PageResult pageResult = employeeService.pageQuery(employeePageQueryDTO);
         return Result.success(pageResult);
+    }
+
+    @PostMapping("/status/{status}")
+    @Operation(summary = "员工停用/启用功能")
+    public Result startOrStop(@PathVariable Integer status, @RequestParam Long id){
+        log.info("员工停用/启用功能，参数为：{}, {}", status, id);
+        employeeService.startOrStop(status, id);
+        return Result.success();
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "根据id查询员工")
+    public Result<Employee> getById(@PathVariable Long id){
+        Employee employee = employeeService.getById(id);
+        return Result.success(employee);
+    }
+
+    @PutMapping
+    @Operation(summary = "编辑员工信息")
+    public Result update(@RequestBody EmployeeDTO employeeDTO) {
+        log.info("编辑员工信息, {}", employeeDTO);
+        employeeService.update(employeeDTO);
+        return Result.success();
     }
 }

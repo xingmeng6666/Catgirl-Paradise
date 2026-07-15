@@ -12,7 +12,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
 
@@ -21,7 +21,7 @@ import java.util.List;
  */
 @Configuration
 @Slf4j
-public class WebMvcConfiguration extends WebMvcConfigurationSupport {
+public class WebMvcConfiguration implements WebMvcConfigurer {
 
     @Autowired
     private JwtTokenAdminInterceptor jwtTokenAdminInterceptor;
@@ -31,7 +31,8 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
      *
      * @param registry
      */
-    protected void addInterceptors(InterceptorRegistry registry) {
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
         log.info("开始注册自定义拦截器...");
         registry.addInterceptor(jwtTokenAdminInterceptor)
                 .addPathPatterns("/admin/**")
@@ -56,23 +57,28 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
      * 设置静态资源映射
      * @param registry
      */
-    protected void addResourceHandlers(ResourceHandlerRegistry registry) {
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
         log.info("开始设置静态资源映射...");
-        registry.addResourceHandler("/doc.html").addResourceLocations("classpath:/META-INF/resources/");
-        registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
+        // Knife4j 资源映射
+        registry.addResourceHandler("/doc.html")
+                .addResourceLocations("classpath:/META-INF/resources/");
+        registry.addResourceHandler("/webjars/**")
+                .addResourceLocations("classpath:/META-INF/resources/webjars/");
     }
 
     /**
      * 设置消息转换器
      * @param converters
      */
-    protected void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+    @Override
+    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
         log.info("扩展 设置消息转换器...");
         // 注册自定义消息转换器
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
         // 设置自定义的ObjectMapper
         converter.setObjectMapper(new JacksonObjectMapper());
-        //加入到转换器列表中
-        converters.add(0, converter);
+        //加入到转换器列表中(不放在第一位，避免影响Knife4j等其他功能)
+        converters.add(converters.size(), converter);
     }
 }
