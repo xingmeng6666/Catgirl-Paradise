@@ -11,3 +11,8 @@ sky:
     access-key-id: YOUR_ALIYUN_ACCESS_KEY_ID
     access-key-secret: YOUR_ALIYUN_ACCESS_KEY_SECRET
     bucket-name: sky-take-out-xingmeng
+  redis:
+    host: localhost
+    port: 6379
+    password:
+    database: 10

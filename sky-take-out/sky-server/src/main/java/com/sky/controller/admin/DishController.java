@@ -5,6 +5,7 @@ import com.sky.dto.DishPageQueryDTO;
 import com.sky.result.PageResult;
 import com.sky.result.Result;
 import com.sky.service.DishService;
+import com.sky.vo.DishVO;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springdoc.core.annotations.ParameterObject;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -46,4 +47,21 @@ public class DishController {
         dishService.deleteBatch(ids);
         return Result.success();
     }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "根据id查询菜品")
+    public Result<DishVO> getById(@PathVariable Long id){
+        log.info("根据id查询菜品:{}", id);
+        DishVO dishVO = dishService.getByIdWithFlavor(id);
+        return Result.success(dishVO);
+    }
+
+    @PutMapping
+    @Operation(summary = "更新菜品")
+    public Result update(@RequestBody DishDTO dishDTO){
+        log.info("更新菜品:{}", dishDTO);
+        dishService.updateWithFlavor(dishDTO);
+        return Result.success();
+    }
+
 }
