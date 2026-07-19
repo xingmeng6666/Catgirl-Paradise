@@ -115,6 +115,6 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
         // 设置自定义的ObjectMapper
         converter.setObjectMapper(new JacksonObjectMapper());
-        converters.add(0, converter);
+        converters.add(1, converter);
     }
 }
