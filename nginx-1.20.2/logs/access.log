@@ -730,3 +730,7 @@
 127.0.0.1 - - [18/Jul/2026:14:54:50 +0800] "GET /api/setmeal/page?page=1&pageSize=10&status= HTTP/1.1" 200 635 "http://localhost/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36 Edg/150.0.0.0"
 127.0.0.1 - - [18/Jul/2026:14:54:53 +0800] "GET /api/category/list?type=2 HTTP/1.1" 200 366 "http://localhost/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36 Edg/150.0.0.0"
 127.0.0.1 - - [18/Jul/2026:14:54:53 +0800] "GET /api/setmeal/page?page=1&pageSize=10&status= HTTP/1.1" 200 635 "http://localhost/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36 Edg/150.0.0.0"
+127.0.0.1 - - [18/Jul/2026:17:18:47 +0800] "\xD1\xE5\xCA?\xF3\xD1Z_\xFC\x06);/\x9E" 400 157 "-" "-"
+127.0.0.1 - - [18/Jul/2026:17:18:47 +0800] "\x9C\xEA\xC3<\xCD\xA7" 400 157 "-" "-"
+127.0.0.1 - - [18/Jul/2026:17:18:49 +0800] "\xB9\xC9g\x8F\x03p\xD9I\x01\x02L\x90J\x16\x8C\x14\x15\xD7\xE3\x8C\x82-\x95b\xDE\xC1W\x0C'GT\x12\xEC\xCB\xE1O,\x07\x9F3\xDA>\xFF\x02^\xF4\x8E\xD6 \xEC\xADC\x8D\xC8i\xF1'\xAA\xD8\xB6\xFC\xF9\xBA\x0B \x83\xDFv]" 400 157 "-" "-"
+127.0.0.1 - - [18/Jul/2026:17:18:49 +0800] "\xDA\x9B\xADwG(\x22[\x12\x08\xE0\xA0\xDC\x1CS\xDAL\xB2W\xAC\x13\xF5\xC8\xFB\x9Ai\xDB\xFD\x1Dk\xA3\x9Bg\xB5\xBF\xC7\x001\xF8\xB7\x8D\x89\xDA\x9B\xFF\xF4Q`p\xD2L\x98\xE8p\xB4l\xD6" 400 157 "-" "-"
