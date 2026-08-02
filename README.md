@@ -204,7 +204,7 @@ CQTakeout/
 | 阿里云 OSS | endpoint `oss-cn-beijing.aliyuncs.com`，bucket `sky-take-out-xingmeng` |
 | 微信小程序 | appid `wxdd390a0920fff3f9` |
 
-> ⚠️ `application-dev.yml` 中包含数据库、OSS、微信等真实凭据，生产环境部署时请改用环境变量或配置中心管理，避免泄露。
+> ⚠️ 出于安全考虑，`application-dev.yml` 中的阿里云 AccessKey、微信 AppSecret 等敏感凭据已替换为占位符（`YOUR_ALIYUN_ACCESS_KEY_ID` / `YOUR_ALIYUN_ACCESS_KEY_SECRET` / `YOUR_WECHAT_APPSECRET`）。请在本地填入自己的凭据后运行，建议通过环境变量或配置中心管理，切勿将真实凭据提交到仓库。
 
 ---
 
@@ -374,4 +374,4 @@ http://localhost:8080/doc.html
 ## 📝 说明
 
 - 本仓库为学习/实战项目，`资料喵/` 课程资料（含安装包与压缩包）已通过 `.gitignore` 排除，不上传至仓库。
-- 请勿在生产环境直接使用 `application-dev.yml` 中的明文凭据，部署前请替换为安全配置方式。
+- 敏感凭据（阿里云 AccessKey、微信 AppSecret）已从历史与配置中替换为占位符，请在本地填入自己的凭据后再运行；部署环境请使用环境变量等安全方式管理。
