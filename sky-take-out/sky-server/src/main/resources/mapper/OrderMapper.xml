@@ -116,4 +116,8 @@
         where id = #{id}
     </update>
 
+    <delete id="deleteById">
+        delete from orders where id = #{id}
+    </delete>
+
 </mapper>

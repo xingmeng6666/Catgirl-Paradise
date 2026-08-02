@@ -19,6 +19,7 @@ import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
 import com.sky.websocket.WebSocketServer;
+import com.sky.utils.WeChatPayUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +48,8 @@ public class OrderServiceImpl implements OrderService {
     private ShoppingCartMapper shoppingCartMapper;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private WeChatPayUtil weChatPayUtil;
 
     /**
      * 用户下单
@@ -77,7 +80,7 @@ public class OrderServiceImpl implements OrderService {
         orders.setOrderTime(LocalDateTime.now());
         orders.setPayStatus(Orders.UN_PAID);
         orders.setStatus(Orders.PENDING_PAYMENT);
-        orders.setNumber(String.valueOf(System.currentTimeMillis()));
+        orders.setNumber(java.util.UUID.randomUUID().toString().replace("-", ""));
         orders.setPhone(addressBook.getPhone());
         orders.setConsignee(addressBook.getConsignee());
         orders.setUserId(userId);
@@ -111,28 +114,32 @@ public class OrderServiceImpl implements OrderService {
      * @param ordersPaymentDTO
      * @return
      */
+    @Transactional
     public OrderPaymentVO payment(OrdersPaymentDTO ordersPaymentDTO) {
         // 根据订单号查询订单
         Orders ordersDB = orderMapper.getByNumber(ordersPaymentDTO.getOrderNumber());
 
-        // 根据订单id更新订单的状态、支付方式、支付状态、结账时间
-        Orders orders = Orders.builder()
-                .id(ordersDB.getId())
-                .status(Orders.TO_BE_CONFIRMED)
-                .payStatus(Orders.PAID)
-                .checkoutTime(LocalDateTime.now())
-                .build();
-        orderMapper.update(orders);
+        // 调用微信支付接口，获取支付参数
+        try {
+            JSONObject jsonObject = weChatPayUtil.pay(
+                    ordersPaymentDTO.getOrderNumber(),
+                    ordersDB.getAmount(),
+                    "苍穹外卖订单",
+                    ordersDB.getUserId().toString()
+            );
 
-        // 通过WebSocket发送来单提醒
-        Map map = new HashMap();
-        map.put("type", 1);
-        map.put("orderId", ordersDB.getId());
-        map.put("content", "订单号:" + ordersPaymentDTO.getOrderNumber());
-        String json = JSON.toJSONString(map);
-        WebSocketServer.sendToAllClient(json);
-
-        return new OrderPaymentVO();
+            // 构建返回的支付参数
+            OrderPaymentVO orderPaymentVO = new OrderPaymentVO();
+            orderPaymentVO.setNonceStr(jsonObject.getString("nonceStr"));
+            orderPaymentVO.setPaySign(jsonObject.getString("paySign"));
+            orderPaymentVO.setSignType(jsonObject.getString("signType"));
+            orderPaymentVO.setTimeStamp(jsonObject.getString("timeStamp"));
+            orderPaymentVO.setPackageStr(jsonObject.getString("package"));
+            return orderPaymentVO;
+        } catch (Exception e) {
+            log.error("微信支付失败：{}", e.getMessage());
+            throw new OrderBusinessException(MessageConstant.ORDER_PAYMENT_ERROR);
+        }
     }
 
     /**
@@ -221,6 +228,7 @@ public class OrderServiceImpl implements OrderService {
      *
      * @param id
      */
+    @Transactional
     public void userCancelById(Long id) {
         // 根据id查询订单
         Orders ordersDB = orderMapper.getById(id);
@@ -240,6 +248,17 @@ public class OrderServiceImpl implements OrderService {
 
         // 订单处于待接单状态下取消，需要进行退款
         if (ordersDB.getStatus().equals(Orders.TO_BE_CONFIRMED)) {
+            try {
+                // 调用微信退款接口
+                weChatPayUtil.refund(
+                        ordersDB.getNumber(),
+                        ordersDB.getNumber(),
+                        ordersDB.getAmount(),
+                        ordersDB.getAmount()
+                );
+            } catch (Exception e) {
+                log.error("微信退款失败：{}", e.getMessage());
+            }
             //支付状态修改为 退款
             orders.setPayStatus(Orders.REFUND);
         }
@@ -334,6 +353,7 @@ public class OrderServiceImpl implements OrderService {
      *
      * @param ordersRejectionDTO
      */
+    @Transactional
     public void rejection(OrdersRejectionDTO ordersRejectionDTO) {
         // 根据id查询订单
         Orders ordersDB = orderMapper.getById(ordersRejectionDTO.getId());
@@ -358,6 +378,7 @@ public class OrderServiceImpl implements OrderService {
      *
      * @param ordersCancelDTO
      */
+    @Transactional
     public void cancel(OrdersCancelDTO ordersCancelDTO) {
         // 根据id查询订单
         Orders ordersDB = orderMapper.getById(ordersCancelDTO.getId());
@@ -437,6 +458,33 @@ public class OrderServiceImpl implements OrderService {
         // 发送消息给所有客户端
         WebSocketServer.sendToAllClient(JSON.toJSONString(map));
 
+    }
+
+    /**
+     * 删除订单
+     * @param id
+     */
+    @Transactional
+    public void delete(Long id) {
+        // 根据id查询订单
+        Orders ordersDB = orderMapper.getById(id);
+
+        // 校验订单是否存在
+        if (ordersDB == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        // 只有已完成或已取消的订单才能删除
+        if (!ordersDB.getStatus().equals(Orders.COMPLETED)
+                && !ordersDB.getStatus().equals(Orders.CANCELLED)) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+
+        // 先删除订单明细
+        orderDetailMapper.deleteByOrderId(id);
+
+        // 再删除订单
+        orderMapper.deleteById(id);
     }
 
     private List<OrderVO> getOrderVOList(Page<Orders> page) {

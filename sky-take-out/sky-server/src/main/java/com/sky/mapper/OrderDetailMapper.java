@@ -21,4 +21,10 @@ public interface OrderDetailMapper {
      */
     @Select("select * from order_detail where order_id = #{orderId}")
     List<OrderDetail> getByOrderId(Long orderId);
+
+    /**
+     * 根据订单id删除订单明细
+     * @param orderId
+     */
+    void deleteByOrderId(Long orderId);
 }

@@ -109,4 +109,10 @@ public interface OrderService {
      * @param id
      */
     void reminder(Long id);
+
+    /**
+     * 删除订单
+     * @param id
+     */
+    void delete(Long id);
 }

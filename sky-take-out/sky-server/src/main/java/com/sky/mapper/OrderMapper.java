@@ -79,4 +79,10 @@ public interface OrderMapper {
      * @param end 结束时间
      */
     List<GoodsSalesDTO> getSalesTop10(LocalDateTime begin, LocalDateTime end);
+
+    /**
+     * 根据id删除订单
+     * @param id
+     */
+    void deleteById(Long id);
 }
